@@ -2,10 +2,7 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import {
-  resultsData,
-  role,
-} from "@/lib/data";
+import { getRole } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Prisma } from "@prisma/client";
@@ -70,7 +67,7 @@ const renderRow = (item: ResultList) => (
     <td className="hidden md:table-cell">{new Intl.DateTimeFormat("en-US").format(item.startTime)}</td>
     <td>
       <div className="flex items-center gap-2">
-        {role === "admin" || role === "teacher" && (
+        {(getRole() === "admin" || getRole() === "teacher") && (
           <>
             <FormModal table="result" type="update" data={item} />
             <FormModal table="result" type="delete" id={item.id} />
@@ -86,6 +83,7 @@ const ResultListPage = async ({
 }: {
   searchParams: { [key: string] : string | undefined};
 }) => {
+  const role = getRole();
 
   const {page, ...queryParams} = searchParams;
   const p = page ? parseInt(page) : 1;
@@ -149,24 +147,25 @@ const ResultListPage = async ({
      )
   ]);
 
-  const data = dataResponse.map((item) => {
-    const assessment = item.exam || item.assignment;
-    if(!assessment) return null;
-    const isExam = "startTime" in assessment;
+  const data = dataResponse
+    .map((item) => {
+      const assessment = item.exam || item.assignment;
+      if (!assessment) return null;
+      const isExam = "startTime" in assessment;
 
-    return {
-      id: item.id,
-      title: assessment.title,
-      studentName: item.student.name,
-      studentSurname: item.student.surname,
-      teacherName: assessment.lesson.teacher.name,
-      teacherSurname: assessment.lesson.teacher.surname,
-      score: item.score,
-      className: assessment.lesson.class.name,
-      startTime: isExam ? assessment.startTime : assessment.startDate,
-
-    }
-  }) 
+      return {
+        id: item.id,
+        title: assessment.title,
+        studentName: item.student.name,
+        studentSurname: item.student.surname,
+        teacherName: assessment.lesson.teacher.name,
+        teacherSurname: assessment.lesson.teacher.surname,
+        score: item.score,
+        className: assessment.lesson.class.name,
+        startTime: isExam ? assessment.startTime : assessment.startDate,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
   
 
   return (
@@ -183,7 +182,7 @@ const ResultListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-yellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            {role === "admin" || role === "teacher" && <FormModal table="result" type="create" />}
+            {(role === "admin" || role === "teacher") && <FormModal table="result" type="create" />}
           </div>
         </div>
       </div>

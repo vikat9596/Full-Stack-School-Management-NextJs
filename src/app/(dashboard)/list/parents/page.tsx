@@ -2,7 +2,7 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { parentsData, role } from "@/lib/data";
+import { getRole } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Parent, Prisma, Student } from "@prisma/client";
@@ -52,7 +52,7 @@ const renderRow = (item: ParentList) => (
     <td className="hidden md:table-cell">{item.address}</td>
     <td>
       <div className="flex items-center gap-2">
-        {role === "admin" && (
+        {getRole() === "admin" && (
           <>
             <FormModal table="parent" type="update" data={item} />
             <FormModal table="parent" type="delete" id={item.id} />
@@ -68,6 +68,7 @@ const ParentListPage = async ({
 }: {
   searchParams: { [key: string] : string | undefined};
 }) => {
+  const role = getRole();
 
   const {page, ...queryParams} = searchParams;
   const p = page ? parseInt(page) : 1;
@@ -120,7 +121,7 @@ const ParentListPage = async ({
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
             {role === "admin" && (
-              <FormModal table="teacher" type="create"/>
+              <FormModal table="parent" type="create"/>
             )}
           </div>
         </div>

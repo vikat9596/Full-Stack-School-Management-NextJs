@@ -2,12 +2,11 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { lessonsData, role } from "@/lib/data";
+import { getRole } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Lesson, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
-import { parse } from "path";
 
 type LessonList = Lesson & {subject: Subject} & {class: Class} & {teacher: Teacher};
 
@@ -41,7 +40,7 @@ const renderRow = (item: LessonList) => (
     <td className="hidden md:table-cell">{item.teacher.name + " " + item.teacher.surname}</td>
     <td>
       <div className="flex items-center gap-2">
-        {role === "admin" && (
+        {getRole() === "admin" && (
           <>
             <FormModal table="lesson" type="update" data={item} />
             <FormModal table="lesson" type="delete" id={item.id} />
@@ -57,6 +56,7 @@ const LessonListPage = async ({
 }: {
   searchParams: { [key: string] : string | undefined};
 }) => {
+  const role = getRole();
 
   const {page, ...queryParams} = searchParams;
   const p = page ? parseInt(page) : 1;

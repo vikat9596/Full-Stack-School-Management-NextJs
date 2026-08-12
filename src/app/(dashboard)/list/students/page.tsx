@@ -2,7 +2,7 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { role, studentsData } from "@/lib/data";
+import { getRole } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Prisma, Student } from "@prisma/client";
@@ -60,7 +60,7 @@ const renderRow = (item: StudentList) => (
       </div>
     </td>
     <td className="hidden md:table-cell">{item.username}</td>
-    <td className="hidden md:table-cell">{item.class.name[0]}</td>
+    <td className="hidden md:table-cell">{item.class.name}</td>
     <td className="hidden md:table-cell">{item.phone}</td>
     <td className="hidden md:table-cell">{item.address}</td>
     <td>
@@ -70,11 +70,11 @@ const renderRow = (item: StudentList) => (
             <Image src="/view.png" alt="" width={16} height={16} />
           </button>
         </Link>
-        {role === "admin" && (
-          // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-purple">
-          //   <Image src="/delete.png" alt="" width={16} height={16} />
-          // </button>
-          <FormModal table="student" type="delete" id={item.id}/>
+        {getRole() === "admin" && (
+          <>
+            <FormModal table="student" type="update" data={item} />
+            <FormModal table="student" type="delete" id={item.id} />
+          </>
         )}
       </div>
     </td>
@@ -85,6 +85,7 @@ const StudentListPage = async ({
 }: {
   searchParams: { [key: string] : string | undefined};
 }) => {
+  const role = getRole();
 
   const {page, ...queryParams} = searchParams;
   const p = page ? parseInt(page) : 1;

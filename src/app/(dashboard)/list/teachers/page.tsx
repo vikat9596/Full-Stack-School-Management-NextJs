@@ -2,7 +2,7 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { role, teachersData } from "@/lib/data";
+import { getRole } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Prisma, Subject, Teacher } from "@prisma/client";
@@ -78,11 +78,11 @@ const renderRow = (item: TeacherList) => (
             <Image src="/view.png" alt="" width={16} height={16} />
           </button>
         </Link>
-        {role === "admin" && (
-          // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-purple">
-          //   <Image src="/delete.png" alt="" width={16} height={16} />
-          // </button>
-          <FormModal table="teacher" type="delete" id={item.id}/>
+        {getRole() === "admin" && (
+          <>
+            <FormModal table="teacher" type="update" data={item} />
+            <FormModal table="teacher" type="delete" id={item.id} />
+          </>
         )}
       </div>
     </td>
@@ -94,6 +94,7 @@ const TeacherListPage = async ({
 }: {
   searchParams: { [key: string] : string | undefined};
 }) => {
+  const role = getRole();
 
   const {page, ...queryParams} = searchParams;
   const p = page ? parseInt(page) : 1;

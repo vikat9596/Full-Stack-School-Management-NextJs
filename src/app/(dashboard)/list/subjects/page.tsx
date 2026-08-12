@@ -2,7 +2,7 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { role, subjectsData } from "@/lib/data";
+import { getRole } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Prisma, Subject, Teacher } from "@prisma/client";
@@ -35,7 +35,7 @@ const renderRow = (item: SubjectList) => (
     <td className="hidden md:table-cell">{item.teachers.map(teacher => teacher.name).join(",")}</td>
     <td>
       <div className="flex items-center gap-2">
-        {role === "admin" && (
+        {getRole() === "admin" && (
           <>
             <FormModal table="subject" type="update" data={item} />
             <FormModal table="subject" type="delete" id={item.id} />
@@ -51,6 +51,7 @@ const SubjectListPage = async ({
 }: {
   searchParams: { [key: string] : string | undefined};
 }) => {
+  const role = getRole();
 
   const {page, ...queryParams} = searchParams;
   const p = page ? parseInt(page) : 1;
@@ -102,7 +103,7 @@ const [data,count] = await prisma.$transaction([
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-yellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            {role === "admin" && <FormModal table="teacher" type="create" />}
+            {role === "admin" && <FormModal table="subject" type="create" />}
           </div>
         </div>
       </div>

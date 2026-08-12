@@ -2,13 +2,13 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { eventsData, role } from "@/lib/data";
+import { getRole } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Event, Prisma } from "@prisma/client";
 import Image from "next/image";
 
-type EventList = Event & {class : Class};
+type EventList = Event & {class : Class | null};
 
 const columns = [
   {
@@ -46,13 +46,13 @@ const renderRow = (item: EventList) => (
     className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-purpleLight"
   >
     <td className="flex items-center gap-4 p-4">{item.title}</td>
-    <td>{item.class.name}</td>
+    <td>{item.class?.name || "All"}</td>
     <td className="hidden md:table-cell">{new Intl.DateTimeFormat("en-US").format(item.startTime)}</td>
     <td className="hidden md:table-cell">{item.startTime.toLocaleTimeString("en-US", {hour:"2-digit",minute:"2-digit", hour12:false})}</td>
     <td className="hidden md:table-cell">{item.endTime.toLocaleTimeString("en-US", {hour:"2-digit",minute:"2-digit", hour12:false})}</td>
     <td>
       <div className="flex items-center gap-2">
-        {role === "admin" && (
+        {getRole() === "admin" && (
           <>
             <FormModal table="event" type="update" data={item} />
             <FormModal table="event" type="delete" id={item.id} />
@@ -68,6 +68,7 @@ const EventListPage = async ({
 }: {
   searchParams: { [key: string] : string | undefined};
 }) => {
+  const role = getRole();
 
   const {page, ...queryParams} = searchParams;
   const p = page ? parseInt(page) : 1;
